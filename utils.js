@@ -6,7 +6,7 @@ try {
   }
 } catch (ex) {}
 
-Utilities.fixFlash = function() {
+Utilities.fixFlash = function () {
   // loop through every embed tag on the site
   var embeds = document.getElementsByTagName('embed');
   var i = 0;
@@ -66,7 +66,7 @@ Utilities.fixFlash = function() {
   }
 };
 
-Utilities.sleep = function(milliseconds) {
+Utilities.sleep = function (milliseconds) {
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i + 1) {
     if ((new Date().getTime() - start) > milliseconds) {

@@ -6,7 +6,7 @@ var webpage = require("webpage"),
   adblock = require('./adblock.js').AdBlock;
 
 
-var Tab = function(ip, port) {
+var Tab = function (ip, port, hubPort) {
   this._time = 0;
   this._resources = {};
   this._orphanResources = [];
@@ -14,46 +14,47 @@ var Tab = function(ip, port) {
   this._autoDestructId = null;
   this._busy = false;
   this._consoleLog = [];
-  this.init(ip, port);
+  this.init(ip, port, hubPort);
 };
 
 
-Tab.prototype.init = function(ip, port, hubUri) {
+Tab.prototype.init = function (ip, port, hubPort) {
   var self = this;
   self._ip = ip;
   self._port = port;
   self._page = webpage.create();
   self._server = webserver.create();
   self._adblock = new adblock();
-  self._hubUri = hubUri;
+  self._hubPort = hubPort;
   console.log("Creating new Tab: " + ip + ":" + port);
   self._page.viewportSize = {
     width: 1024,
     height: 768
   };
   self._page.settings.resourceTimeout = 60000;
-  self._page.onResourceRequested = function(requestData, networkRequest) {
+  self._page.onResourceRequested = function (requestData, networkRequest) {
     self._onResourceRequested(requestData, networkRequest);
   };
-  self._page.onResourceReceived = function(response) {
+  self._page.onResourceReceived = function (response) {
     self._onResourceReceived(response);
   };
-  self._page.onResourceTimeout = function(request) {
+  self._page.onResourceTimeout = function (request) {
     self._onResourceTimeout(request);
   };
-  self._page.onResourceError = function(resourceError) {
+  self._page.onResourceError = function (resourceError) {
     self._onResourceError(resourceError);
   };
-  self._page.onConsoleMessage = function(msg, lineNum, sourceId) {
+  self._page.onConsoleMessage = function (msg, lineNum, sourceId) {
     self._onConsoleMessage(msg, lineNum, sourceId);
   };
   console.log("------");
+  console.log(self._ip + ":" + self._hubPort + '/announceTab');
   try {
     self._server.listen(ip + ":" + port,
-      function(request, response) {
+      function (request, response) {
         self._handleRequest(request, response);
       });
-    if (self._hubUri) {
+    if (self._hubPort) {
       self._announceTab();
     }
   } catch (ex) {
@@ -64,18 +65,19 @@ Tab.prototype.init = function(ip, port, hubUri) {
 };
 
 
-Tab.prototype._announceTab = function() {
+Tab.prototype._announceTab = function () {
   var self = this;
   var page = webpage.create();
   //window.close();
-  var url = self._hubUri + '/announceTab',
+  var url = "http://" + self._ip + ":" + self._hubPort + '/announceTab',
     data = JSON.stringify({
       port: self._port
     }),
     headers = {
       "Content-Type": "application/json"
     };
-  page.open(url, 'post', data, headers, function(status) {
+
+  page.open(url, 'post', data, headers, function (status) {
     page.close();
     if (status !== "success") {
       phantom.exit();
@@ -84,7 +86,7 @@ Tab.prototype._announceTab = function() {
 };
 
 
-Tab.prototype._onResourceRequested = function(requestData, networkRequest) {
+Tab.prototype._onResourceRequested = function (requestData, networkRequest) {
   var self = this;
   //console.log('Request (#' + requestData.id + '): ' + JSON.stringify(requestData));
   if (self._adblock.getIsAd(requestData.url) === true) {
@@ -102,19 +104,19 @@ Tab.prototype._onResourceRequested = function(requestData, networkRequest) {
 };
 
 
-Tab.prototype._onResourceReceived = function(response) {
+Tab.prototype._onResourceReceived = function (response) {
   var self = this;
   switch (response.stage) {
-    case 'start':
-      self._resources[response.id].waiting = response.time.getTime() - self._resources[response.id].request.time.getTime();
-      break;
-    case 'end':
-      if (self._resources[response.id].response) {
-        self._resources[response.id].receiving = response.time.getTime() - self._resources[response.id].response.time.getTime();
-      }
-      break;
-    default:
-      break;
+  case 'start':
+    self._resources[response.id].waiting = response.time.getTime() - self._resources[response.id].request.time.getTime();
+    break;
+  case 'end':
+    if (self._resources[response.id].response) {
+      self._resources[response.id].receiving = response.time.getTime() - self._resources[response.id].response.time.getTime();
+    }
+    break;
+  default:
+    break;
   }
   self._orphanResources.splice(self._orphanResources.indexOf(response.id), 1);
   self._resources[response.id].response = response;
@@ -122,7 +124,7 @@ Tab.prototype._onResourceReceived = function(response) {
 };
 
 
-Tab.prototype._onResourceError = function(request) {
+Tab.prototype._onResourceError = function (request) {
   var self = this;
   self._orphanResources.splice(self._orphanResources.indexOf(request.id), 1);
   //self._resources[request.id].request = request;
@@ -130,7 +132,7 @@ Tab.prototype._onResourceError = function(request) {
 };
 
 
-Tab.prototype._onResourceTimeout = function(resourceError) {
+Tab.prototype._onResourceTimeout = function (resourceError) {
   var self = this;
   self._orphanResources.splice(self._orphanResources.indexOf(resourceError.id), 1);
   self._resources[resourceError.id].response = resourceError;
@@ -138,7 +140,7 @@ Tab.prototype._onResourceTimeout = function(resourceError) {
 };
 
 
-Tab.prototype._onConsoleMessage = function(msg, lineNum, sourceId) {
+Tab.prototype._onConsoleMessage = function (msg, lineNum, sourceId) {
   var self = this;
   self._consoleLog.push({
     msg: msg,
@@ -149,7 +151,7 @@ Tab.prototype._onConsoleMessage = function(msg, lineNum, sourceId) {
 };
 
 
-Tab.prototype._open = function(url, waitForResources, callback) {
+Tab.prototype._open = function (url, waitForResources, callback) {
   var self = this;
   self._resources = {};
   self._orphanResources = [];
@@ -158,9 +160,9 @@ Tab.prototype._open = function(url, waitForResources, callback) {
   if (waitForResources === undefined)
     waitForResources = true;
 
-  self._page.open(url, function(status) {
+  self._page.open(url, function (status) {
 
-    var callbackFunc = function() {
+    var callbackFunc = function () {
       callback({
         success: status === 'success' ? true : false,
         elapsedTime: Date.now() - self._time
@@ -168,7 +170,7 @@ Tab.prototype._open = function(url, waitForResources, callback) {
     };
 
     if (waitForResources)
-      self._waitForResources(60000, function() {
+      self._waitForResources(60000, function () {
         callbackFunc();
       });
     else
@@ -177,7 +179,7 @@ Tab.prototype._open = function(url, waitForResources, callback) {
 };
 
 
-Tab.prototype._addCookie = function(name, value, domain, path, httponly, secure, expires, callback) {
+Tab.prototype._addCookie = function (name, value, domain, path, httponly, secure, expires, callback) {
   var success = phantom.addCookie({
     'name': name,
     'value': value,
@@ -193,7 +195,7 @@ Tab.prototype._addCookie = function(name, value, domain, path, httponly, secure,
 };
 
 
-Tab.prototype._setUserAgent = function(userAgent, callback) {
+Tab.prototype._setUserAgent = function (userAgent, callback) {
   var self = this;
   self._page.settings.userAgent = userAgent;
   callback({
@@ -202,7 +204,7 @@ Tab.prototype._setUserAgent = function(userAgent, callback) {
 };
 
 
-Tab.prototype._getResources = function(callback) {
+Tab.prototype._getResources = function (callback) {
   var self = this;
   callback({
     success: true,
@@ -211,7 +213,7 @@ Tab.prototype._getResources = function(callback) {
 };
 
 
-Tab.prototype._getScreenshot = function(callback) {
+Tab.prototype._getScreenshot = function (callback) {
   var self = this;
   self._busy = true;
   utils.fixFlash();
@@ -223,8 +225,8 @@ Tab.prototype._getScreenshot = function(callback) {
     width: 1024,
     height: 4096
   };
-  window.setTimeout(function() {
-    self._waitForResources(60000, function() {
+  window.setTimeout(function () {
+    self._waitForResources(60000, function () {
       self._page.viewportSize = {
         width: origSize.width,
         height: origSize.height
@@ -240,14 +242,14 @@ Tab.prototype._getScreenshot = function(callback) {
 };
 
 
-Tab.prototype._waitForResources = function(timeout, callback) {
+Tab.prototype._waitForResources = function (timeout, callback) {
   var self = this;
   if (timeout === null || timeout === undefined) {
     timeout = 20000;
   }
   var time = Date.now();
 
-  var wait = function() {
+  var wait = function () {
     if (self._orphanResources.length > 0 && Date.now() - time < timeout) {
       //console.log("Orphaned resources: " + self._orphanResources.length + " " + self._orphanResources);
       setTimeout(wait, 1000);
@@ -259,7 +261,7 @@ Tab.prototype._waitForResources = function(timeout, callback) {
 };
 
 
-Tab.prototype._destroy = function(callback) {
+Tab.prototype._destroy = function (callback) {
   var self = this;
   callback({
     success: true
@@ -270,14 +272,14 @@ Tab.prototype._destroy = function(callback) {
 };
 
 
-Tab.prototype._ping = function(callback) {
-  window.setTimeout(function() {
+Tab.prototype._ping = function (callback) {
+  window.setTimeout(function () {
     callback(null);
   }, 5000);
 };
 
 
-Tab.prototype._evaluate = function(script, callback) {
+Tab.prototype._evaluate = function (script, callback) {
   var self = this;
   var result = null;
   if (typeof slimer !== 'undefined')
@@ -292,7 +294,7 @@ Tab.prototype._evaluate = function(script, callback) {
 };
 
 
-Tab.prototype._evaluateOnGecko = function(script, callback) {
+Tab.prototype._evaluateOnGecko = function (script, callback) {
   /*jslint evil: true */
   'use strict';
   var self = this;
@@ -304,7 +306,7 @@ Tab.prototype._evaluateOnGecko = function(script, callback) {
 };
 
 
-Tab.prototype._getConsoleLog = function(callback) {
+Tab.prototype._getConsoleLog = function (callback) {
   var self = this;
   callback({
     consoleLog: self._consoleLog
@@ -312,14 +314,14 @@ Tab.prototype._getConsoleLog = function(callback) {
 };
 
 
-Tab.prototype._getCookies = function(callback) {
+Tab.prototype._getCookies = function (callback) {
   var self = this;
   callback({
     cookies: phantom.cookies
   });
 };
 
-Tab.prototype._setScreenSize = function(size, callback) {
+Tab.prototype._setScreenSize = function (size, callback) {
   var self = this;
   self._page.viewportSize = {
     width: size.width,
@@ -331,10 +333,10 @@ Tab.prototype._setScreenSize = function(size, callback) {
 };
 
 
-Tab.prototype._resetAutoDestruct = function() {
+Tab.prototype._resetAutoDestruct = function () {
   var self = this;
   //console.log("Resetting auto Destruct");
-  var destroyFunc = function() {
+  var destroyFunc = function () {
     if (!self._busy) {
       phantom.exit();
     } else
@@ -345,85 +347,85 @@ Tab.prototype._resetAutoDestruct = function() {
 };
 
 
-Tab.prototype._handleRequest = function(request, response) {
+Tab.prototype._handleRequest = function (request, response) {
   var self = this;
   if (!request.post)
     request.post = "";
   var data = request.post !== "" ? JSON.parse(request.post) : {};
-  var callback = function(data) {
+  var callback = function (data) {
     response.statusCode = 200;
     data = data !== null ? JSON.stringify(data) : "";
     response.write(data);
     response.close();
   };
-  self._page.evaluate(function() {
+  self._page.evaluate(function () {
     window.focus();
   });
   switch (request.url) {
-    case "/open":
-      self._resetAutoDestruct();
-      self._open(data.url, data.waitForResources, callback);
-      break;
-    case "/addCookie":
-      self._resetAutoDestruct();
-      self._addCookie(data.name, data.value, data.domain, data.path,
-        data.httponly, data.secure, data.expires, callback);
-      break;
-    case "/setUserAgent":
-      self._resetAutoDestruct();
-      self._setUserAgent(data.userAgent, callback);
-      break;
-    case "/getResources":
-      self._resetAutoDestruct();
-      self._getResources(callback);
-      break;
-    case "/getScreenshot":
-      self._resetAutoDestruct();
-      self._getScreenshot(callback);
-      break;
-    case "/destroy":
-      self._destroy(callback);
-      break;
-    case "/ping":
-      self._ping(callback);
-      break;
-    case "/evaluate":
-      self._resetAutoDestruct();
-      self._evaluate(data.script, callback);
-      break;
-    case "/evaluateOnGecko":
-      self._resetAutoDestruct();
-      self._evaluateOnGecko(data.script, callback);
-      break;
-    case "/getConsoleLog":
-      self._resetAutoDestruct();
-      self._getConsoleLog(callback);
-      break;
-    case "/getCookies":
-      self._resetAutoDestruct();
-      self._getCookies(callback);
-      break;
-    case "/waitForResources":
-      self._resetAutoDestruct();
-      self._waitForResources(data.timeout, callback);
-      break;
-    case "/setScreenSize":
-      self._resetAutoDestruct();
-      self._setScreenSize(data.size, callback);
-      break;
-    default:
-      console.log("WHAT DO YOU WANT?");
-      response.statusCode = 500;
-      response.write("");
-      response.close();
-      return;
+  case "/open":
+    self._resetAutoDestruct();
+    self._open(data.url, data.waitForResources, callback);
+    break;
+  case "/addCookie":
+    self._resetAutoDestruct();
+    self._addCookie(data.name, data.value, data.domain, data.path,
+      data.httponly, data.secure, data.expires, callback);
+    break;
+  case "/setUserAgent":
+    self._resetAutoDestruct();
+    self._setUserAgent(data.userAgent, callback);
+    break;
+  case "/getResources":
+    self._resetAutoDestruct();
+    self._getResources(callback);
+    break;
+  case "/getScreenshot":
+    self._resetAutoDestruct();
+    self._getScreenshot(callback);
+    break;
+  case "/destroy":
+    self._destroy(callback);
+    break;
+  case "/ping":
+    self._ping(callback);
+    break;
+  case "/evaluate":
+    self._resetAutoDestruct();
+    self._evaluate(data.script, callback);
+    break;
+  case "/evaluateOnGecko":
+    self._resetAutoDestruct();
+    self._evaluateOnGecko(data.script, callback);
+    break;
+  case "/getConsoleLog":
+    self._resetAutoDestruct();
+    self._getConsoleLog(callback);
+    break;
+  case "/getCookies":
+    self._resetAutoDestruct();
+    self._getCookies(callback);
+    break;
+  case "/waitForResources":
+    self._resetAutoDestruct();
+    self._waitForResources(data.timeout, callback);
+    break;
+  case "/setScreenSize":
+    self._resetAutoDestruct();
+    self._setScreenSize(data.size, callback);
+    break;
+  default:
+    console.log("WHAT DO YOU WANT?");
+    response.statusCode = 500;
+    response.write("");
+    response.close();
+    return;
   }
 };
 
 
 if (phantom.args[0] !== undefined && phantom.args[1] !== undefined) {
+  console.log(phantom.args[2]);
   var ip = phantom.args[0];
   var port = phantom.args[1];
-  console.log(ip, port);
-  new Tab(ip, port);
+  new Tab(ip, port, phantom.args[2]);
 }
