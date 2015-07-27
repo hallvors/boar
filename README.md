@@ -14,6 +14,12 @@ SlimerJS can use an environment variable to determine the exact Firefox binary t
 
 Run ```slimerjs tab.js 7331```
 
+### Troubleshooting SlimerJS issues
+
+* If you get an error saying "Platform version x.xx is not compatible with .." you must either set SLIMERJS_LAUNCHER to point to a Firefox binary of the expected version, or edit the MaxVersion setting in submodules/slimerjs/src/application.ini
+
+* If you get an error saying "Permission denied to access property 'CoffeeScript'", the easiest workaround is to change ```enableCoffeeScript: true``` to ```enableCoffeeScript: false``` in submodules/slimerjs/src/modules/slConfiguration.jsm
+
 ## Quick API Reference
 
 * $HUB_URL / new:
