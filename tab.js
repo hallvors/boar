@@ -2,6 +2,7 @@
 
 var webpage = require("webpage"),
   webserver = require('webserver'),
+  system = require('system'),
   utils = require('./utils.js'),
   adblock = require('./adblock.js').AdBlock;
 
@@ -422,10 +423,9 @@ Tab.prototype._handleRequest = function (request, response) {
   }
 };
 
-
-if (phantom.args[0] !== undefined && phantom.args[1] !== undefined) {
-  console.log(phantom.args[2]);
-  var ip = phantom.args[0];
-  var port = phantom.args[1];
-  new Tab(ip, port, phantom.args[2]);
+if (system.args[1] !== undefined && system.args[2] !== undefined) {
+  console.log(system.args[2]);
+  var ip = system.args[1];
+  var port = system.args[2];
+  new Tab(ip, port, system.args[3]);
 }
