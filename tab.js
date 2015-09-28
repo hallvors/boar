@@ -108,16 +108,16 @@ Tab.prototype._onResourceRequested = function (requestData, networkRequest) {
 Tab.prototype._onResourceReceived = function (response) {
   var self = this;
   switch (response.stage) {
-  case 'start':
-    self._resources[response.id].waiting = response.time.getTime() - self._resources[response.id].request.time.getTime();
-    break;
-  case 'end':
-    if (self._resources[response.id].response) {
-      self._resources[response.id].receiving = response.time.getTime() - self._resources[response.id].response.time.getTime();
-    }
-    break;
-  default:
-    break;
+    case 'start':
+      self._resources[response.id].waiting = response.time.getTime() - self._resources[response.id].request.time.getTime();
+      break;
+    case 'end':
+      if (self._resources[response.id].response) {
+        self._resources[response.id].receiving = response.time.getTime() - self._resources[response.id].response.time.getTime();
+      }
+      break;
+    default:
+      break;
   }
   self._orphanResources.splice(self._orphanResources.indexOf(response.id), 1);
   self._resources[response.id].response = response;
@@ -363,63 +363,63 @@ Tab.prototype._handleRequest = function (request, response) {
     window.focus();
   });
   switch (request.url) {
-  case "/open":
-    self._resetAutoDestruct();
-    self._open(data.url, data.waitForResources, callback);
-    break;
-  case "/addCookie":
-    self._resetAutoDestruct();
-    self._addCookie(data.name, data.value, data.domain, data.path,
-      data.httponly, data.secure, data.expires, callback);
-    break;
-  case "/setUserAgent":
-    self._resetAutoDestruct();
-    self._setUserAgent(data.userAgent, callback);
-    break;
-  case "/getResources":
-    self._resetAutoDestruct();
-    self._getResources(callback);
-    break;
-  case "/getScreenshot":
-    self._resetAutoDestruct();
-    self._getScreenshot(callback);
-    break;
-  case "/destroy":
-    self._destroy(callback);
-    break;
-  case "/ping":
-    self._ping(callback);
-    break;
-  case "/evaluate":
-    self._resetAutoDestruct();
-    self._evaluate(data.script, callback);
-    break;
-  case "/evaluateOnGecko":
-    self._resetAutoDestruct();
-    self._evaluateOnGecko(data.script, callback);
-    break;
-  case "/getConsoleLog":
-    self._resetAutoDestruct();
-    self._getConsoleLog(callback);
-    break;
-  case "/getCookies":
-    self._resetAutoDestruct();
-    self._getCookies(callback);
-    break;
-  case "/waitForResources":
-    self._resetAutoDestruct();
-    self._waitForResources(data.timeout, callback);
-    break;
-  case "/setScreenSize":
-    self._resetAutoDestruct();
-    self._setScreenSize(data.size, callback);
-    break;
-  default:
-    console.log("WHAT DO YOU WANT?");
-    response.statusCode = 500;
-    response.write("");
-    response.close();
-    return;
+    case "/open":
+      self._resetAutoDestruct();
+      self._open(data.url, data.waitForResources, callback);
+      break;
+    case "/addCookie":
+      self._resetAutoDestruct();
+      self._addCookie(data.name, data.value, data.domain, data.path,
+        data.httponly, data.secure, data.expires, callback);
+      break;
+    case "/setUserAgent":
+      self._resetAutoDestruct();
+      self._setUserAgent(data.userAgent, callback);
+      break;
+    case "/getResources":
+      self._resetAutoDestruct();
+      self._getResources(callback);
+      break;
+    case "/getScreenshot":
+      self._resetAutoDestruct();
+      self._getScreenshot(callback);
+      break;
+    case "/destroy":
+      self._destroy(callback);
+      break;
+    case "/ping":
+      self._ping(callback);
+      break;
+    case "/evaluate":
+      self._resetAutoDestruct();
+      self._evaluate(data.script, callback);
+      break;
+    case "/evaluateOnGecko":
+      self._resetAutoDestruct();
+      self._evaluateOnGecko(data.script, callback);
+      break;
+    case "/getConsoleLog":
+      self._resetAutoDestruct();
+      self._getConsoleLog(callback);
+      break;
+    case "/getCookies":
+      self._resetAutoDestruct();
+      self._getCookies(callback);
+      break;
+    case "/waitForResources":
+      self._resetAutoDestruct();
+      self._waitForResources(data.timeout, callback);
+      break;
+    case "/setScreenSize":
+      self._resetAutoDestruct();
+      self._setScreenSize(data.size, callback);
+      break;
+    default:
+      console.log("WHAT DO YOU WANT?");
+      response.statusCode = 500;
+      response.write("");
+      response.close();
+      return;
   }
 };
 
