@@ -1,0 +1,16 @@
+{
+  "name": "boar",
+  "version": "0.0.1",
+  "description": "Browser over a Restful(API)",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Asynchq/boar.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Asynchq/boar/issues"
+  },
+  "homepage": "https://github.com/Asynchq/boar#readme"
+}
