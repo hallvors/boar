@@ -12,5 +12,12 @@
   "bugs": {
     "url": "https://github.com/Asynchq/boar/issues"
   },
-  "homepage": "https://github.com/Asynchq/boar#readme"
+  "homepage": "https://github.com/Asynchq/boar#readme",
+  "dependencies": {
+    "phantomjs": "^1.9.18",
+    "slimerjs": "^0.9.6",
+    "sugar": "^1.4.1",
+    "winston": "^1.1.0",
+    "yargs": "^3.27.0"
+  }
 }

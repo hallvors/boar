@@ -1,0 +1,69 @@
+#!/bin/sh
+":" //# comment; exec /usr/bin/env node --harmony "$0" "$@"
+
+//https://github.com/nodejs/node-v0.x-archive/pull/7007 there is no other way
+//how to pass harmony flag
+
+"use strict";
+
+global.DEBUG = true;
+
+let argv = require('yargs')
+  .usage('Usage: $0 <command> [options]')
+  .command('webkit', 'Run phantomjs based tab')
+  .command('gecko', 'Run slimerjs based tab')
+  .demand(1)
+
+  .check((argv) => {
+    if(argv._[0] !== 'webkit' && argv._[0] !== 'gecko') {
+      throw new Error('Only webkit and gecko are supported as engines');
+    }
+
+    return true;
+  })
+
+  .default('p', 8778)
+  .alias('p', 'port')
+  .describe('p', 'Boar port, used to communicate with boar')
+
+  .default('h', 8779)
+  .alias('h', 'hub')
+  .describe('h', 'Hub port for http server run inside boar runner script')
+
+  .help('help')
+
+  .argv,
+  released = false,
+  instance = new (require('../').Summoner)(argv._[0], '127.0.0.1', argv.p, argv.h, (error, data) => {
+    if(error) {
+      throw error;
+    }
+
+    console.info('Tab released it can be access using ' + data.url);
+  });
+
+//Running simple http server here you can see when tab becomes available
+require('http').createServer((req, resp) => {
+  let body = '';
+
+  req.on('data', (chunck) => {
+    body += chunck.toString();
+  });
+
+  req.once('end', () => {
+    console.info('Got request for hub url %s with `%s` body', req.url, body);
+  });
+
+  if(req.url === '/announceTab' && !released) {
+    instance.release();
+    released = true;
+  }
+
+  resp.write('{}');
+  resp.end();
+}).listen(argv.h);
+
+instance.once('exit', () => {
+  console.info('Tab instance exited');
+  process.exit(1);
+});
