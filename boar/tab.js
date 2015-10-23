@@ -4,7 +4,8 @@ var webpage = require("webpage"),
   webserver = require('webserver'),
   system = require('system'),
   utils = require('./utils.js'),
-  adblock = require('./adblock.js').AdBlock;
+  PluginManager = require('./pluginManager.js').PluginManager;
+
 
 
 var Tab = function (ip, port, hubPort) {
@@ -25,7 +26,8 @@ Tab.prototype.init = function (ip, port, hubPort) {
   self._port = port;
   self._page = webpage.create();
   self._server = webserver.create();
-  self._adblock = new adblock();
+  //self._adblock = new adblock();
+  self._pluginManager = new PluginManager(self._page);
   self._hubPort = hubPort;
   console.log("Creating new Tab: " + ip + ":" + port);
   self._page.viewportSize = {
@@ -48,6 +50,18 @@ Tab.prototype.init = function (ip, port, hubPort) {
   self._page.onConsoleMessage = function (msg, lineNum, sourceId) {
     self._onConsoleMessage(msg, lineNum, sourceId);
   };
+  self._page.onError = function (msg, stack) {
+    self._onError(msg, stack);
+  };
+  self._page.onInitialized = function () {
+    self._onInitialized();
+  };
+  self._page.onLoadStarted = function () {
+    self._onLoadStarted();
+  };
+  self._page.onLoadFinished = function (status) {
+    self._onLoadFinished(status);
+  };
   console.log("------");
   console.log(self._ip + ":" + self._hubPort + '/announceTab');
   try {
@@ -65,6 +79,16 @@ Tab.prototype.init = function (ip, port, hubPort) {
   self._resetAutoDestruct();
 };
 
+Tab.prototype._onError = function (msg, stack) {
+  msg = "\nScript Error: " + msg + "\n";
+  if (stack && stack.length) {
+    msg += "       Stack:\n";
+    stack.forEach(function (t) {
+      msg += '         -> ' + (t.file || t.sourceURL) + ': ' + t.line + (t.function ? ' (in function ' + t.function + ')' : '') + "\n";
+    });
+  }
+  console.error(msg + "\n");
+};
 
 Tab.prototype._announceTab = function () {
   var self = this;
@@ -90,7 +114,7 @@ Tab.prototype._announceTab = function () {
 Tab.prototype._onResourceRequested = function (requestData, networkRequest) {
   var self = this;
   //console.log('Request (#' + requestData.id + '): ' + JSON.stringify(requestData));
-  if (self._adblock.getIsAd(requestData.url) === true) {
+  if (!self._pluginManager.onResourceRequested(requestData, networkRequest)) {
     networkRequest.abort();
   } else {
     self._resources[requestData.id] = {
@@ -107,6 +131,7 @@ Tab.prototype._onResourceRequested = function (requestData, networkRequest) {
 
 Tab.prototype._onResourceReceived = function (response) {
   var self = this;
+  self._pluginManager.onResourceReceived(response);
   switch (response.stage) {
     case 'start':
       self._resources[response.id].waiting = response.time.getTime() - self._resources[response.id].request.time.getTime();
@@ -152,8 +177,27 @@ Tab.prototype._onConsoleMessage = function (msg, lineNum, sourceId) {
 };
 
 
+Tab.prototype._onInitialized = function () {
+  var self = this;
+  self._pluginManager.onInitialized();
+};
+
+
+Tab.prototype._onLoadStarted = function () {
+  var self = this;
+  self._pluginManager.onLoadStarted();
+};
+
+
+Tab.prototype._onLoadFinished = function () {
+  var self = this;
+  self._pluginManager.onLoadFinished();
+};
+
+
 Tab.prototype._open = function (url, waitForResources, callback) {
   var self = this;
+  self._pluginManager.reset();
   self._resources = {};
   self._orphanResources = [];
   self._time = Date.now();
@@ -298,7 +342,6 @@ Tab.prototype._evaluate = function (script, callback) {
 Tab.prototype._evaluateOnGecko = function (script, callback) {
   /*jslint evil: true */
   'use strict';
-  var self = this;
   var result = eval(script);
   callback({
     script: script,
@@ -316,11 +359,11 @@ Tab.prototype._getConsoleLog = function (callback) {
 
 
 Tab.prototype._getCookies = function (callback) {
-  var self = this;
   callback({
     cookies: phantom.cookies
   });
 };
+
 
 Tab.prototype._setScreenSize = function (size, callback) {
   var self = this;
@@ -330,6 +373,14 @@ Tab.prototype._setScreenSize = function (size, callback) {
   };
   callback({
     size: self._page.viewportSize
+  });
+};
+
+
+Tab.prototype._getPluginsResults = function (callback) {
+  var self = this;
+  callback({
+    results: self._pluginManager.getResults()
   });
 };
 
@@ -352,13 +403,14 @@ Tab.prototype._handleRequest = function (request, response) {
   var self = this;
   if (!request.post)
     request.post = "";
-  var data = request.post !== "" ? JSON.parse(request.post) : {};
   var callback = function (data) {
     response.statusCode = 200;
     data = data !== null ? JSON.stringify(data) : "";
     response.write(data);
     response.close();
+
   };
+  var data = request.post !== "" ? JSON.parse(request.post) : {};
   self._page.evaluate(function () {
     window.focus();
   });
@@ -414,6 +466,10 @@ Tab.prototype._handleRequest = function (request, response) {
       self._resetAutoDestruct();
       self._setScreenSize(data.size, callback);
       break;
+    case "/getPluginsResults":
+      self._resetAutoDestruct();
+      self._getPluginsResults(callback);
+      break;
     default:
       console.log("WHAT DO YOU WANT?");
       response.statusCode = 500;
@@ -422,6 +478,7 @@ Tab.prototype._handleRequest = function (request, response) {
       return;
   }
 };
+
 
 if (system.args[1] !== undefined && system.args[2] !== undefined) {
   console.log(system.args[2]);

@@ -96,3 +96,7 @@ try {
     exports.Utilities = Utilities;
   }
 } catch (ex) {}
+
+Utilities.endsWith = function(uri, suffix) {
+    return uri.split(".").pop() === suffix;
+};
