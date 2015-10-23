@@ -18,7 +18,7 @@ def do_command(url, command, data={}):
     return response
 
 # The tab url from the previous request, all upcomin requests will be sent to that url
-url = "http://localhost:7331"
+url = "http://localhost:8778"
 
 
 # Set Cookies
@@ -37,19 +37,17 @@ data = {'userAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:30.0) Geck
 response = do_command(url, "setUserAgent", data)
 
 # Run a gecko based Javascript, if a result is to be expected it can be found under {'result'} of the json string returned
-data = {'script': 'self._page.onLoadFinished = function(){ console.log("HELP"); };'}
+data = {'script': 'var x = function(){ console.log("HELP"); }; x();'}
 response = do_command(url, "evaluateOnGecko", data)
 
 # Open URL
-data = {'url': 'http://www.google.de', 'waitForResources': False}
+data = {'url': 'http://www.holidaycheck.de', 'waitForResources': False}
 response = do_command(url, "open", data)
-
 
 data = {'timeout': 60000}
 response = do_command(url, "waitForResources", data)
 
-
-# Get Resources 
+# Get Resources
 response = do_command(url, "getResources")
 resources = json.loads(response.text)["resources"]
 keys = sorted(resources.keys(), key=lambda x: int(x))
@@ -78,6 +76,7 @@ response = do_command(url, "getCookies", cookie)
 
 response = do_command(url, "getConsoleLog")
 
+response = do_command(url, "getPluginsResults")
 
 # Destroy Tab
 response = do_command(url, "destroy")
