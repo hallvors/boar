@@ -7,6 +7,8 @@ Browser over a Restful(API)
 
 1. Clone this project (or your own fork of it, if you want to create pull requests)
 2. ```npm install```
+3.* For linux install ```xvfb```, this way gecko based slimerjs will run in true headless mode
+(in current state it there is no out of the box solution for that)
 
 ### Local use
 
