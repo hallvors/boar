@@ -10,6 +10,8 @@ Browser over a Restful(API)
 3.* For linux install ```xvfb```, this way gecko based slimerjs will run in true headless mode
 (in current state it there is no out of the box solution for that)
 
+!NB user who runs boar must have home directory, slimerjs will try to write files there
+
 ### Local use
 
 SlimerJS can use an environment variable to determine the exact Firefox binary to use. You may want to set SLIMERJS_LAUNCHER and point to a specific Firefox.exe or xulrunner instance. If SlimerJS fails to find Firefox automatically on your system, you *must* set this variable before you'll be able to run the next commands.
