@@ -358,6 +358,10 @@ Tab.prototype._getConsoleLog = function (callback) {
 };
 
 
+Tab.prototype._clearConsoleLog = function (callback) {
+  this._consoleLog.length = 0;
+}
+
 Tab.prototype._getCookies = function (callback) {
   callback({
     cookies: phantom.cookies
@@ -417,6 +421,7 @@ Tab.prototype._handleRequest = function (request, response) {
   switch (request.url) {
     case "/open":
       self._resetAutoDestruct();
+      self._clearConsoleLog();
       self._open(data.url, data.waitForResources, callback);
       break;
     case "/addCookie":
