@@ -7,10 +7,11 @@ Browser over a Restful(API)
 
 1. Clone this project (or your own fork of it, if you want to create pull requests)
 2. ```npm install```
-3.* For linux install ```xvfb```, this way gecko based slimerjs will run in true headless mode
+3. For linux install ```xvfb```, this way gecko based slimerjs will run in true headless mode
 (in current state it there is no out of the box solution for that)
 
 !NB user who runs boar must have home directory, slimerjs will try to write files there
+!NB Running Boar requires *Node.js 0.12* or greater, with support for ES6 syntax
 
 ### Local use
 
