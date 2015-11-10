@@ -1,5 +1,7 @@
 var fs = require('fs');
 
+var messageString = 'window.orientation was read!'
+
 var WindowOrientationUsage = function (page) {
   'use strict';
   this.init(page);
@@ -17,13 +19,24 @@ WindowOrientationUsage.prototype.init = function (page) {
 WindowOrientationUsage.prototype.onLoadInitialized = function () {
   var self = this;
   if (!self._started) {
-    Object.defineProperty(window, 'orientation', {
-      get: function () {
-        self.res = true;
-      }
-    });
+    self._page.evaluate(function(){
+      Object.defineProperty(window, 'orientation', {
+        get: function () {
+          console.log(arguments[0]);
+          return 1;
+        }
+      });
+    }, [messageString]);
+    self._started = true;
   }
 };
+
+WindowOrientationUsage.prototype.onConsoleMessage = function (msg, lineNum, sourceId) {
+  var self = this;
+  if(msg === messageString) {
+    self.res = true;
+  }
+}
 
 WindowOrientationUsage.prototype.getResult = function () {
   var self = this;
