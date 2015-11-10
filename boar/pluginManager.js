@@ -102,12 +102,12 @@ _PluginManager.prototype.onLoadFinished = function () {
 };
 
 
-_PluginManager.prototype.onConsoleMessage = function () {
+_PluginManager.prototype.onConsoleMessage = function (msg, lineNum, sourceId) {
   var self = this;
   for (var p in self.plugins) {
     if (self.plugins[p].onConsoleMessage) {
       try {
-        self.plugins[p].onConsoleMessage();
+        self.plugins[p].onConsoleMessage(msg, lineNum, sourceId);
       } catch (ex) {
         console.log(ex);
       }

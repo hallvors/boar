@@ -168,7 +168,7 @@ Tab.prototype._onResourceTimeout = function (resourceError) {
 
 Tab.prototype._onConsoleMessage = function (msg, lineNum, sourceId) {
   var self = this;
-  self._pluginManager.onConsoleMessage(response);
+  self._pluginManager.onConsoleMessage(msg, lineNum, sourceId);
   self._consoleLog.push({
     msg: msg,
     lineNum: lineNum,
