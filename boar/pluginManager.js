@@ -102,6 +102,20 @@ _PluginManager.prototype.onLoadFinished = function () {
 };
 
 
+_PluginManager.prototype.onConsoleMessage = function () {
+  var self = this;
+  for (var p in self.plugins) {
+    if (self.plugins[p].onConsoleMessage) {
+      try {
+        self.plugins[p].onConsoleMessage();
+      } catch (ex) {
+        console.log(ex);
+      }
+    }
+  }
+};
+
+
 _PluginManager.prototype.getResults = function () {
   var self = this;
   var results = {};
