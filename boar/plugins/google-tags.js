@@ -14,8 +14,10 @@ GoogleTags.prototype.init = function (page) {
 GoogleTags.prototype.onLoadFinished = function (status) {
   var self = this;
   var data = self._page.evaluate(function () {
-    var data = JSON.stringify(window.dataLayer);
-    return JSON.parse(data);
+    try{
+      var data = JSON.stringify(window.dataLayer);
+      return JSON.parse(data);      
+    }catch(e){}
   });
   self.res[self._page.url] = data;
 };
