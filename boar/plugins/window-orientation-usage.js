@@ -1,5 +1,3 @@
-var fs = require('fs');
-
 var messageString = 'window.orientation was read!'
 
 var WindowOrientationUsage = function (page) {
