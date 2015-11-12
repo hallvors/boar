@@ -312,9 +312,11 @@ Tab.prototype._destroy = function (callback) {
   callback({
     success: true
   });
-  self._page.close();
-  self._server.close();
-  phantom.exit();
+  setTimeout(function() {
+    self._page.close();
+    self._server.close();
+    phantom.exit();
+  }, 10);
 };
 
 
