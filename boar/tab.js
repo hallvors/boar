@@ -202,6 +202,7 @@ Tab.prototype._onLoadFinished = function () {
 Tab.prototype._open = function (url, waitForResources, callback) {
   var self = this;
   self._pluginManager.reset();
+  self._clearConsoleLog();
   self._clearErrorLog();
   self._resources = {};
   self._orphanResources = [];
@@ -442,7 +443,6 @@ Tab.prototype._handleRequest = function (request, response) {
   switch (request.url) {
     case "/open":
       self._resetAutoDestruct();
-      self._clearConsoleLog();
       self._open(data.url, data.waitForResources, callback);
       break;
     case "/addCookie":
