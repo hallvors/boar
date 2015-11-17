@@ -16,6 +16,7 @@ var Tab = function (ip, port, hubPort) {
   this._autoDestructId = null;
   this._busy = false;
   this._consoleLog = [];
+  this._errorLog = [];
   this.init(ip, port, hubPort);
 };
 
@@ -80,6 +81,8 @@ Tab.prototype.init = function (ip, port, hubPort) {
 };
 
 Tab.prototype._onError = function (msg, stack) {
+  var self = this;
+  self._errorLog.push({msg:msg, stack:stack});
   msg = "\nScript Error: " + msg + "\n";
   if (stack && stack.length) {
     msg += "       Stack:\n";
@@ -199,6 +202,7 @@ Tab.prototype._onLoadFinished = function () {
 Tab.prototype._open = function (url, waitForResources, callback) {
   var self = this;
   self._pluginManager.reset();
+  self._clearErrorLog();
   self._resources = {};
   self._orphanResources = [];
   self._time = Date.now();
@@ -361,9 +365,23 @@ Tab.prototype._getConsoleLog = function (callback) {
 };
 
 
+Tab.prototype._getErrorLog = function (callback) {
+  var self = this;
+  callback({
+    errorLog: self._errorLog
+  });
+};
+
+
 Tab.prototype._clearConsoleLog = function (callback) {
   this._consoleLog.length = 0;
 }
+
+
+Tab.prototype._clearErrorLog = function (callback) {
+  this._errorLog.length = 0;
+}
+
 
 Tab.prototype._getCookies = function (callback) {
   callback({
@@ -461,6 +479,10 @@ Tab.prototype._handleRequest = function (request, response) {
     case "/getConsoleLog":
       self._resetAutoDestruct();
       self._getConsoleLog(callback);
+      break;
+    case "/getErrorLog":
+      self._resetAutoDestruct();
+      self._getErrorLog(callback);
       break;
     case "/getCookies":
       self._resetAutoDestruct();
