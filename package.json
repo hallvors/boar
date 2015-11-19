@@ -14,9 +14,12 @@
   },
   "homepage": "https://github.com/Asynchq/boar#readme",
   "dependencies": {
+    "async": "^1.5.0",
     "phantomjs": "^1.9.18",
+    "ps-tree": "^1.0.1",
     "slimerjs": "^0.9.6",
     "sugar": "^1.4.1",
+    "usage": "^0.7.1",
     "winston": "^1.1.0",
     "yargs": "^3.27.0"
   }
