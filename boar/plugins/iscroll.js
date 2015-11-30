@@ -16,20 +16,12 @@ IScroll.prototype.init = function (page) {
 
 IScroll.prototype.onLoadFinished = function () {
 	var self = this;
-	var linkrellist = document.querySelectorAll('link[rel*=\"icon\"]');
-	var data = [];
-	for (var i = 0, link; link = linkrellist[i]; i++) {
-		data.push({});
-		var relvalues = {};
-		relvalues = link.rel.trim().split(/\\s+/);
-		data[i].relvalue = relvalues;
-		if (link.getAttribute('sizes')) {
-			var sizevalues = {};
-			sizevalues = link.getAttribute('sizes').trim().split(/\\s+/);
-			data[i].sizes = sizevalues;
-		}
-	}
-	self.res = JSON.stringify(data);
+    self.res = self._page.evaluate(function(){
+        if (window.iScroll && !window.IScroll){
+            return true;
+        }
+        return false;
+    });
 };
 
 IScroll.prototype.getResult = function () {
