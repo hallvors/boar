@@ -14,17 +14,17 @@ IScroll.prototype.init = function (page) {
   self._page = page;
 };
 
-IScroll.prototype.onLoadStarted = function () {
+IScroll.prototype.onLoadFinished = function () {
 	var self = this;
 	var linkrellist = document.querySelectorAll('link[rel*=\"icon\"]');
 	var data = [];
-	for (var i = 0, link; link = linkrellist[i]; i++) { 
+	for (var i = 0, link; link = linkrellist[i]; i++) {
 		data.push({});
 		var relvalues = {};
 		relvalues = link.rel.trim().split(/\\s+/);
 		data[i].relvalue = relvalues;
-		if (link.getAttribute('sizes')) { 
-			var sizevalues = {}; 
+		if (link.getAttribute('sizes')) {
+			var sizevalues = {};
 			sizevalues = link.getAttribute('sizes').trim().split(/\\s+/);
 			data[i].sizes = sizevalues;
 		}

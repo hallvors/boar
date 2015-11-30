@@ -13,9 +13,9 @@ MobifyCheck.prototype.init = function (page) {
 	self._page = page;
 };
 
-MobifyCheck.prototype.onLoadStarted = function () {
+MobifyCheck.prototype.onLoadFinished = function () {
 	var self = this;
-	for (var i = 0; i < document.scripts.length; i+=1) { 
+	for (var i = 0; i < document.scripts.length; i+=1) {
 		var s = document.scripts[i];
 		if (s.src.indexOf('mobify') > -1) {
 			self.res = s.src;
