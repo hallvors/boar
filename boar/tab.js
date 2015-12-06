@@ -263,20 +263,8 @@ Tab.prototype._getScreenshot = function (callback) {
   var self = this;
   self._busy = true;
   utils.fixFlash();
-  var origSize = {
-    width: self._page.viewportSize.width,
-    height: self._page.viewportSize.height
-  };
-  self._page.viewportSize = {
-    width: 1024,
-    height: 4096
-  };
   window.setTimeout(function () {
     self._waitForResources(60000, function () {
-      self._page.viewportSize = {
-        width: origSize.width,
-        height: origSize.height
-      };
       var base64 = self._page.renderBase64('PNG');
       self._busy = false;
       callback({
