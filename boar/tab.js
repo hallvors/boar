@@ -16,6 +16,7 @@ var Tab = function (ip, port, hubPort) {
   this._autoDestructId = null;
   this._busy = false;
   this._consoleLog = [];
+  this._errorLog = [];
   this.init(ip, port, hubPort);
 };
 
@@ -80,6 +81,7 @@ Tab.prototype.init = function (ip, port, hubPort) {
 };
 
 Tab.prototype._onError = function (msg, stack) {
+  var self = this;
   msg = "\nScript Error: " + msg + "\n";
   if (stack && stack.length) {
     msg += "       Stack:\n";
@@ -87,6 +89,7 @@ Tab.prototype._onError = function (msg, stack) {
       msg += '         -> ' + (t.file || t.sourceURL) + ': ' + t.line + (t.function ? ' (in function ' + t.function + ')' : '') + "\n";
     });
   }
+  self._errorLog.push(msg);
   console.error(msg + "\n");
 };
 
@@ -349,6 +352,14 @@ Tab.prototype._getConsoleLog = function (callback) {
 };
 
 
+Tab.prototype._getErrorLog = function (callback) {
+  var self = this;
+  callback({
+    consoleLog: self._errorLog
+  });
+};
+
+
 Tab.prototype._clearConsoleLog = function (callback) {
   this._consoleLog.length = 0;
 }
@@ -449,6 +460,10 @@ Tab.prototype._handleRequest = function (request, response) {
     case "/getConsoleLog":
       self._resetAutoDestruct();
       self._getConsoleLog(callback);
+      break;
+    case "/getErrorLog":
+      self._resetAutoDestruct();
+      self._getErrorLog(callback);
       break;
     case "/getCookies":
       self._resetAutoDestruct();
