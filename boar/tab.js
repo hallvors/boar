@@ -384,7 +384,7 @@ Tab.prototype._setScreenSize = function (size, callback) {
 };
 
 
-Tab.prototype._getPluginsResults = function (callback) {
+Tab.prototype._getPluginResults = function (callback) {
   var self = this;
   callback({
     results: self._pluginManager.getResults()
@@ -474,9 +474,9 @@ Tab.prototype._handleRequest = function (request, response) {
       self._resetAutoDestruct();
       self._setScreenSize(data.size, callback);
       break;
-    case "/getPluginsResults":
+    case "/getPluginResults":
       self._resetAutoDestruct();
-      self._getPluginsResults(callback);
+      self._getPluginResults(callback);
       break;
     default:
       console.log("WHAT DO YOU WANT?");

@@ -76,7 +76,7 @@ response = do_command(url, "getCookies", cookie)
 
 response = do_command(url, "getConsoleLog")
 
-response = do_command(url, "getPluginsResults")
+response = do_command(url, "getPluginResults")
 
 # Destroy Tab
 response = do_command(url, "destroy")
