@@ -4,7 +4,7 @@
 
 STATUS=0
 
-ENGINE=gecko node_modules/.bin/mocha --harmony --recursive tests || STATUS=$?
-ENGINE=webkit node_modules/.bin/mocha --harmony --recursive tests || STATUS=$?
+ENGINE=gecko node_modules/.bin/mocha --harmony --recursive --timeout 60000 tests || STATUS=$?
+ENGINE=webkit node_modules/.bin/mocha --harmony --recursive --timeout 60000 tests || STATUS=$?
 
 exit $STATUS
