@@ -16,6 +16,7 @@ var Tab = function (ip, port, hubPort) {
   this._autoDestructId = null;
   this._busy = false;
   this._consoleLog = [];
+  this._errorLog = [];
   this.init(ip, port, hubPort);
 };
 
@@ -80,6 +81,7 @@ Tab.prototype.init = function (ip, port, hubPort) {
 };
 
 Tab.prototype._onError = function (msg, stack) {
+  var self = this;
   msg = "\nScript Error: " + msg + "\n";
   if (stack && stack.length) {
     msg += "       Stack:\n";
@@ -87,6 +89,7 @@ Tab.prototype._onError = function (msg, stack) {
       msg += '         -> ' + (t.file || t.sourceURL) + ': ' + t.line + (t.function ? ' (in function ' + t.function + ')' : '') + "\n";
     });
   }
+  self._errorLog.push(msg);
   console.error(msg + "\n");
 };
 
@@ -263,20 +266,8 @@ Tab.prototype._getScreenshot = function (callback) {
   var self = this;
   self._busy = true;
   utils.fixFlash();
-  var origSize = {
-    width: self._page.viewportSize.width,
-    height: self._page.viewportSize.height
-  };
-  self._page.viewportSize = {
-    width: 1024,
-    height: 4096
-  };
   window.setTimeout(function () {
     self._waitForResources(60000, function () {
-      self._page.viewportSize = {
-        width: origSize.width,
-        height: origSize.height
-      };
       var base64 = self._page.renderBase64('PNG');
       self._busy = false;
       callback({
@@ -361,6 +352,14 @@ Tab.prototype._getConsoleLog = function (callback) {
 };
 
 
+Tab.prototype._getErrorLog = function (callback) {
+  var self = this;
+  callback({
+    consoleLog: self._errorLog
+  });
+};
+
+
 Tab.prototype._clearConsoleLog = function (callback) {
   this._consoleLog.length = 0;
 }
@@ -384,7 +383,7 @@ Tab.prototype._setScreenSize = function (size, callback) {
 };
 
 
-Tab.prototype._getPluginsResults = function (callback) {
+Tab.prototype._getPluginResults = function (callback) {
   var self = this;
   callback({
     results: self._pluginManager.getResults()
@@ -462,6 +461,10 @@ Tab.prototype._handleRequest = function (request, response) {
       self._resetAutoDestruct();
       self._getConsoleLog(callback);
       break;
+    case "/getErrorLog":
+      self._resetAutoDestruct();
+      self._getErrorLog(callback);
+      break;
     case "/getCookies":
       self._resetAutoDestruct();
       self._getCookies(callback);
@@ -474,9 +477,9 @@ Tab.prototype._handleRequest = function (request, response) {
       self._resetAutoDestruct();
       self._setScreenSize(data.size, callback);
       break;
-    case "/getPluginsResults":
+    case "/getPluginResults":
       self._resetAutoDestruct();
-      self._getPluginsResults(callback);
+      self._getPluginResults(callback);
       break;
     default:
       console.log("WHAT DO YOU WANT?");
