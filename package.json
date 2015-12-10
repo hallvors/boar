@@ -14,7 +14,9 @@
   },
   "homepage": "https://github.com/Asynchq/boar#readme",
   "scripts": {
-    "test": "tests/run.sh"
+    "test": "tests/run.sh",
+    "test_webkit" : "ENGINE=webkit node_modules/.bin/mocha --harmony --timeout 60000 --recursive tests || true",
+    "test_gecko" : "ENGINE=gecko node_modules/.bin/mocha --harmony --timeout 60000 --recursive tests || true"
   },
   "dependencies": {
     "async": "^1.5.0",
