@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Asynchq/boar.svg?branch=master)](https://travis-ci.org/Asynchq/boar)
+
 # Boar
 Browser over a Restful(API)
 
