@@ -17,16 +17,18 @@ WindowOrientationUsage.prototype.init = function (page) {
 WindowOrientationUsage.prototype.onInitialized = function () {
   var self = this;
   if (!self._started) {
-    self._page.evaluate(function(){
-      var messageString = arguments[0];
-      Object.defineProperty(window, 'orientation', { 
-        get: function () {
-          console.log(messageString);
-          return 1;
-        }
-      });
-    }, [messageString]);
-    self._started = true;
+    if (self._page.url) {
+      self._page.evaluate(function(){
+        var messageString = arguments[0];
+        Object.defineProperty(window, 'orientation', {
+          get: function () {
+            console.log(messageString);
+            return 1;
+          }
+        });
+      }, [messageString]);
+      self._started = true;
+    }
   }
 };
 
