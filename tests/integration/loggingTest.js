@@ -33,7 +33,7 @@ describe(process.env.ENGINE + ' Logging', () => {
       .catch(done);
     });
 
-    it('should be returning some output if there is compile time error', (done) => {
+    it('should be returning some output if there is runtime error', (done) => {
       client.open({
         url : 'data:text/html,<html><script>undefined(\'foo\')</script><p>Hello test</p></html>'
       }).then(() => {
@@ -46,7 +46,7 @@ describe(process.env.ENGINE + ' Logging', () => {
       .catch(done);
     });
 
-    it('should be returning some output if there is runtime time error', (done) => {
+    it('should be returning some output if there is compile error', (done) => {
       client.open({
         url : 'data:text/html,<html><script>void(\'foo)</script><p>Hello test</p></html>'
       }).then(() => {
