@@ -124,7 +124,7 @@ describe(process.env.ENGINE + ' Logging', () => {
       .then((data) => {
         data.consoleLog.length.should.be.equal(1);
         data.consoleLog[0].msg.should.be.equal('foo');
-        data.consoleLog[0].lineNum.should.be.equal(1);
+        //data.consoleLog[0].lineNum.should.be.equal(1);
         done();
       })
       .catch(done);
@@ -139,7 +139,7 @@ describe(process.env.ENGINE + ' Logging', () => {
       .then((data) => {
         data.consoleLog.length.should.be.equal(1);
         data.consoleLog[0].msg.should.be.equal('foo');
-        data.consoleLog[0].lineNum.should.be.equal(1);
+        //data.consoleLog[0].lineNum.should.be.equal(1);
         done();
       })
       .catch(done);
@@ -154,7 +154,7 @@ describe(process.env.ENGINE + ' Logging', () => {
       .then((data) => {
         data.consoleLog.length.should.be.equal(1);
         data.consoleLog[0].msg.should.be.equal('foo');
-        data.consoleLog[0].lineNum.should.be.equal(1);
+        //data.consoleLog[0].lineNum.should.be.equal(1);
         done();
       })
       .catch(done);
@@ -169,7 +169,7 @@ describe(process.env.ENGINE + ' Logging', () => {
       .then((data) => {
         data.consoleLog.length.should.be.equal(1);
         data.consoleLog[0].msg.should.be.equal('foo');
-        data.consoleLog[0].lineNum.should.be.equal(1);
+        //data.consoleLog[0].lineNum.should.be.equal(1);
         done();
       })
       .catch(done);
