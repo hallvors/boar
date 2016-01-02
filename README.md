@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Asynchq/boar.svg?branch=master)](https://travis-ci.org/Asynchq/boar)
+
 # Boar
 Browser over a Restful(API)
 
@@ -104,3 +106,47 @@ Run ```bin/boar gecko|webkit```, default port is 8778
 * $URL / getCookies:
   - returns:
       - cookies: a list of cookies
+
+# Tests
+
+## Running tests
+
+```npm run test_webkit``` or ```npm run test_gecko``` will run only individual engines. ```npm test``` will run tests on both gecko and webkit.
+
+Individual test files can bun run ```node_modules/.bin/mocha --timeout 60000 tests/integration/...```
+
+## Test file structure
+
+```js
+"use strict";
+
+let setup = require('../init'),
+  should = require('should');
+
+describe('something', () => {
+  let client;
+  beforeEach((done) => {
+    setup.start(process.env.ENGINE, (error, c) => {
+      client = c;
+      done(error);
+    });
+  });
+
+  afterEach((done) => {
+    client.destroy().then(() => {
+      setup.stop(done);
+    }).catch(done);
+  });
+
+  describe('something', () => {
+    it('should be dangerous', (done) => {
+      client.open({url : ...})
+        .then((result) => {
+          ..
+          done();
+        })
+       .catch(done)
+    });
+  })
+});
+```
