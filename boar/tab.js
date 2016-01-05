@@ -17,6 +17,7 @@ var Tab = function (ip, port, hubPort) {
   this._busy = false;
   this._consoleLog = [];
   this._errorLog = [];
+  this._redirects = {};
   this.init(ip, port, hubPort);
 };
 
@@ -147,6 +148,11 @@ Tab.prototype._onResourceReceived = function (response) {
     default:
       break;
   }
+
+  if (response.redirectURL) {
+    self._redirects[response.url] = response.redirectURL;
+  }
+
   self._orphanResources.splice(self._orphanResources.indexOf(response.id), 1);
   self._resources[response.id].response = response;
   //console.log('Response (#' + response.id + ', stage "' + response.stage + '"): ' + JSON.stringify(self._resources[response.id]));
@@ -355,14 +361,14 @@ Tab.prototype._getConsoleLog = function (callback) {
 Tab.prototype._getErrorLog = function (callback) {
   var self = this;
   callback({
-    consoleLog: self._errorLog
+    errorLog: self._errorLog
   });
 };
 
 
 Tab.prototype._clearConsoleLog = function (callback) {
   this._consoleLog.length = 0;
-}
+};
 
 Tab.prototype._getCookies = function (callback) {
   callback({
@@ -387,6 +393,14 @@ Tab.prototype._getPluginResults = function (callback) {
   var self = this;
   callback({
     results: self._pluginManager.getResults()
+  });
+};
+
+
+Tab.prototype._getRedirects = function (callback) {
+  var self = this;
+  callback({
+    redirects: self._redirects
   });
 };
 
@@ -480,6 +494,10 @@ Tab.prototype._handleRequest = function (request, response) {
     case "/getPluginResults":
       self._resetAutoDestruct();
       self._getPluginResults(callback);
+      break;
+    case "/getRedirects":
+      self._resetAutoDestruct();
+      self._getRedirects(callback);
       break;
     default:
       console.log("WHAT DO YOU WANT?");

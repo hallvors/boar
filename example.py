@@ -41,7 +41,7 @@ data = {'script': 'var x = function(){ console.log("HELP"); }; x();'}
 response = do_command(url, "evaluateOnGecko", data)
 
 # Open URL
-data = {'url': 'http://www.holidaycheck.de', 'waitForResources': False}
+data = {'url': 'http://www.google.com', 'waitForResources': False}
 response = do_command(url, "open", data)
 
 data = {'timeout': 60000}
@@ -79,5 +79,6 @@ response = do_command(url, "getConsoleLog")
 response = do_command(url, "getPluginResults")
 
 response = do_command(url, "getErrorLog")
+response = do_command(url, "getRedirects")
 # Destroy Tab
 response = do_command(url, "destroy")
