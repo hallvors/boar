@@ -27,7 +27,7 @@ describe(process.env.ENGINE + ' Logging', () => {
         return client.getErrorLog();
       })
       .then((data) => {
-        data.consoleLog.length.should.be.equal(0);
+        data.errorLog.length.should.be.equal(0);
         done();
       })
       .catch(done);
@@ -40,7 +40,7 @@ describe(process.env.ENGINE + ' Logging', () => {
         return client.getErrorLog();
       })
       .then((data) => {
-        data.consoleLog.length.should.be.equal(1);
+        data.errorLog.length.should.be.equal(1);
         done();
       })
       .catch(done);
@@ -53,7 +53,7 @@ describe(process.env.ENGINE + ' Logging', () => {
         return client.getErrorLog();
       })
       .then((data) => {
-        data.consoleLog.length.should.be.equal(1);
+        data.errorLog.length.should.be.equal(1);
         done();
       })
       .catch(done);
@@ -66,7 +66,7 @@ describe(process.env.ENGINE + ' Logging', () => {
         return client.getErrorLog();
       })
       .then((data) => {
-        data.consoleLog.length.should.be.equal(0);
+        data.errorLog.length.should.be.equal(0);
         done();
       })
       .catch(done);
