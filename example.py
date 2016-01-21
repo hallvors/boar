@@ -40,45 +40,50 @@ response = do_command(url, "setUserAgent", data)
 data = {'script': 'var x = function(){ console.log("HELP"); }; x();'}
 response = do_command(url, "evaluateOnGecko", data)
 
+# disable some plugins
+data = {'plugins': ["css-analyzer", "window-orientation-usage", "google-tag-manager"]}
+print data
+response = do_command(url, "disablePlugins", data)
+
 # Open URL
-data = {'url': 'http://www.google.com', 'waitForResources': False}
+data = {'url': 'http://www.ebay.com', 'waitForResources': False}
 response = do_command(url, "open", data)
 
 data = {'timeout': 60000}
 response = do_command(url, "waitForResources", data)
 
 # Get Resources
-response = do_command(url, "getResources")
-resources = json.loads(response.text)["resources"]
-keys = sorted(resources.keys(), key=lambda x: int(x))
-print "\nThe Resources \n"
-for key in keys:
-    print key, json.dumps(resources[key], sort_keys=True, indent=4, separators=(',', ': '))
-print ""
+#response = do_command(url, "getResources")
+#resources = json.loads(response.text)["resources"]
+#keys = sorted(resources.keys(), key=lambda x: int(x))
+#print "\nThe Resources \n"
+#for key in keys:
+#    print key, json.dumps(resources[key], sort_keys=True, indent=4, separators=(',', ': '))
+#print ""
 
-data = {"size": {"width": 1280, "height":400}}
-response = do_command(url, "setScreenSize", data)
+#data = {"size": {"width": 1280, "height":400}}
+#response = do_command(url, "setScreenSize", data)
 
 # Take Screenshot and return base64 string under data
-response = do_command(url, "getScreenshot")
-base64 = json.loads(response.text)["data"]
-fh = open("imageToSave.png", "wb")
-fh.write(base64.decode('base64'))
-fh.close()
+#response = do_command(url, "getScreenshot")
+#base64 = json.loads(response.text)["data"]
+#fh = open("imageToSave.png", "wb")
+#fh.write(base64.decode('base64'))
+#fh.close()
 
 
 # Run a DOM based javascript, if a result is to be expected it can be found under {'result'} of the json string returned
-data = {'script': "function(){return document.getElementsByClassName('ctr-p').length>0}"}
-response = do_command(url, "evaluate", data)
+#data = {'script': "function(){return document.getElementsByClassName('ctr-p').length>0}"}
+#response = do_command(url, "evaluate", data)
 
 
-response = do_command(url, "getCookies", cookie)
+#response = do_command(url, "getCookies", cookie)
 
-response = do_command(url, "getConsoleLog")
+#response = do_command(url, "getConsoleLog")
 
 response = do_command(url, "getPluginResults")
 
-response = do_command(url, "getErrorLog")
-response = do_command(url, "getRedirects")
+#response = do_command(url, "getErrorLog")
+#response = do_command(url, "getRedirects")
 # Destroy Tab
 response = do_command(url, "destroy")

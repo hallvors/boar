@@ -405,6 +405,13 @@ Tab.prototype._getRedirects = function (callback) {
 };
 
 
+Tab.prototype._disablePlugins = function (disabled, callback) {
+  var self = this;
+  self._pluginManager.disable(disabled);
+  callback();
+};
+
+
 Tab.prototype._resetAutoDestruct = function () {
   var self = this;
   //console.log("Resetting auto Destruct");
@@ -498,6 +505,10 @@ Tab.prototype._handleRequest = function (request, response) {
     case "/getRedirects":
       self._resetAutoDestruct();
       self._getRedirects(callback);
+      break;
+    case "/disablePlugins":
+      self._resetAutoDestruct();
+      self._disablePlugins(data.plugins, callback);
       break;
     default:
       console.log("WHAT DO YOU WANT?");
