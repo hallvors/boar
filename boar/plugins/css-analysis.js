@@ -15,7 +15,7 @@ CSSAnalyzer.prototype.init = function (page) {
 
 CSSAnalyzer.prototype.onLoadFinished = function () {
     var self = this;
-    self.res = self._page.evaluate(analyze());
+    self.res = self._page.evaluate(analyze);
 };
 
 CSSAnalyzer.prototype.getResult = function () {
@@ -35,30 +35,29 @@ function analyze() {
         problems: [ {property: value: } ]
     */
     /*TODO:
- 
+
     Perhaps unsurprising, a major issue with this approach is performance.
     It might not seem like a big problem for something that can run by itself
     and record data at leisure, but slow performance makes it time consuming to
     test and develop..
- 
+
     */
 
-    var ts1 = new Date;
     var list = [];
     var neutralFrame = document.body.appendChild(document.createElement('iframe'));
     var comparisonStyle = cloneobj(neutralFrame.contentWindow.getComputedStyle(neutralFrame.contentDocument.body));
     document.body.removeChild(neutralFrame);
-    console.log('Before qsa' + ((new Date) - ts1));
+
     var elms = document.querySelectorAll('*');
     var css_properties = ['webkitAnimation', 'webkitTransition', 'webkitTransform'];
     var css_values = ['-webkit-gradient', '-webkit-flex', '-webkit-box'];
+
     for (var i = 0, elm; elm = elms[i]; i++) {
-        console.log('Før elm: ' + elm.tagName + ' ' + ((new Date) - ts1));
         var coords = elm.getBoundingClientRect();
         var tmp = createCSSSelector(elm);
-        var obj = { selector: tmp[0].join(' '), index: tmp[1], coords: cloneobj(coords), problems: [] }
-        //        console.log(elm.outerHTML.substr(0,30) +' ' + JSON.stringify(obj));
+        var obj = { selector: tmp[0].join(' '), index: tmp[1], coords: cloneobj(coords), problems: [] };
         var style = getComputedStyle(elm);
+
         // property test
         for (var j = 0, css; css = css_properties[j]; j++) {
             // This is where we should figure out if the value is set or default..
@@ -66,10 +65,11 @@ function analyze() {
                 obj.problems.push({ property: css, value: style[css] });
             }
         }
+
         // value test
         for (var prop in style) {
             if (isNaN(parseInt(prop)) && prop !== 'cssText') {// We skip the numerical lists of properties
-                for (var j = 0, css; css = css_values[j]; j++) {
+                for (j = 0, css; css = css_values[j]; j++) {
                     if (style[prop] && style[prop].toString().indexOf(css) > -1) {
                         obj.problems.push({ property: prop, value: style[prop] });
                     }
@@ -80,17 +80,20 @@ function analyze() {
         if (obj.problems.length) {
             list.push(obj);
         }
-        console.log((new Date) - ts1);
-    };
-    
-    return JSON.stringify(list, null, 2);
+    }
+
+    return list;
 
     function createCSSSelector(elm) {
         var desc = '', descParts = [], origElm = elm;
         while (elm) {
             descParts.unshift(descElm(elm));
             desc = descParts.join(' ');
-            try { document.querySelectorAll(desc) } catch (e) { console.log('FAILED generated selector: ' + desc + '\n' + e) }
+            try {
+                document.querySelectorAll(desc);
+            } catch (e) {
+                console.log('FAILED generated selector: ' + desc + '\n' + e) ;
+            }
             if (document.querySelectorAll(desc).length === 1 || descParts.length > 5) {
                 break;
             }
@@ -109,11 +112,11 @@ function analyze() {
     function descElm(elm) {
         var desc = elm.tagName.toLowerCase();
         if (elm.id) {
-            desc += '#' + CSS.escape(elm.id);
+            desc += '#' + CSSEscape(elm.id);
         }
         if (elm.classList.length) {
             [].forEach.call(elm.classList, function (theClass) {
-                desc += '.' + CSS.escape(theClass);
+                desc += '.' + CSSEscape(theClass);
             });
             //           desc += '.' + [].join.call(elm.classList, '.');
         }
@@ -131,91 +134,78 @@ function analyze() {
         return obj;
     }
 
+    var InvalidCharacterError = function (message) {
+        this.message = message;
+    };
+
+    InvalidCharacterError.prototype = new Error();
+    InvalidCharacterError.prototype.name = 'InvalidCharacterError';
+
     /*! https://mths.be/cssescape v0.2.1 by @mathias | MIT license */
-    ; (function (root) {
+    function CSSEscape(value) {
+        var string = String(value);
+        var length = string.length;
+        var index = -1;
+        var codeUnit;
+        var result = '';
+        var firstCodeUnit = string.charCodeAt(0);
+        while (++index < length) {
+            codeUnit = string.charCodeAt(index);
+            // Note: there’s no need to special-case astral symbols, surrogate
+            // pairs, or lone surrogates.
 
-        if (!root.CSS) {
-            root.CSS = {};
+            // If the character is NULL (U+0000), then throw an
+            // `InvalidCharacterError` exception and terminate these steps.
+            if (codeUnit == 0x0000) {
+                throw new InvalidCharacterError(
+                    'Invalid character: the input contains U+0000.'
+                    );
+            }
+
+            if (
+                // If the character is in the range [\1-\1F] (U+0001 to U+001F) or is
+                // U+007F, […]
+                (codeUnit >= 0x0001 && codeUnit <= 0x001F) || codeUnit == 0x007F ||
+                // If the character is the first character and is in the range [0-9]
+                // (U+0030 to U+0039), […]
+                (index == 0 && codeUnit >= 0x0030 && codeUnit <= 0x0039) ||
+                // If the character is the second character and is in the range [0-9]
+                // (U+0030 to U+0039) and the first character is a `-` (U+002D), […]
+                (
+                    index == 1 &&
+                    codeUnit >= 0x0030 && codeUnit <= 0x0039 &&
+                    firstCodeUnit == 0x002D
+                    )
+                ) {
+                // http://dev.w3.org/csswg/cssom/#escape-a-character-as-code-point
+                result += '\\' + codeUnit.toString(16) + ' ';
+                continue;
+            }
+
+            // If the character is not handled by one of the above rules and is
+            // greater than or equal to U+0080, is `-` (U+002D) or `_` (U+005F), or
+            // is in one of the ranges [0-9] (U+0030 to U+0039), [A-Z] (U+0041 to
+            // U+005A), or [a-z] (U+0061 to U+007A), […]
+            if (
+                codeUnit >= 0x0080 ||
+                codeUnit == 0x002D ||
+                codeUnit == 0x005F ||
+                codeUnit >= 0x0030 && codeUnit <= 0x0039 ||
+                codeUnit >= 0x0041 && codeUnit <= 0x005A ||
+                codeUnit >= 0x0061 && codeUnit <= 0x007A
+                ) {
+                // the character itself
+                result += string.charAt(index);
+                continue;
+            }
+
+            // Otherwise, the escaped character.
+            // http://dev.w3.org/csswg/cssom/#escape-a-character
+            result += '\\' + string.charAt(index);
+
         }
-
-        var CSS = root.CSS;
-
-        var InvalidCharacterError = function (message) {
-            this.message = message;
-        };
-        InvalidCharacterError.prototype = new Error;
-        InvalidCharacterError.prototype.name = 'InvalidCharacterError';
-
-        if (!CSS.escape) {
-            // http://dev.w3.org/csswg/cssom/#serialize-an-identifier
-            CSS.escape = function (value) {
-                var string = String(value);
-                var length = string.length;
-                var index = -1;
-                var codeUnit;
-                var result = '';
-                var firstCodeUnit = string.charCodeAt(0);
-                while (++index < length) {
-                    codeUnit = string.charCodeAt(index);
-                    // Note: there’s no need to special-case astral symbols, surrogate
-                    // pairs, or lone surrogates.
-
-                    // If the character is NULL (U+0000), then throw an
-                    // `InvalidCharacterError` exception and terminate these steps.
-                    if (codeUnit == 0x0000) {
-                        throw new InvalidCharacterError(
-                            'Invalid character: the input contains U+0000.'
-                            );
-                    }
-
-                    if (
-                        // If the character is in the range [\1-\1F] (U+0001 to U+001F) or is
-                        // U+007F, […]
-                        (codeUnit >= 0x0001 && codeUnit <= 0x001F) || codeUnit == 0x007F ||
-                        // If the character is the first character and is in the range [0-9]
-                        // (U+0030 to U+0039), […]
-                        (index == 0 && codeUnit >= 0x0030 && codeUnit <= 0x0039) ||
-                        // If the character is the second character and is in the range [0-9]
-                        // (U+0030 to U+0039) and the first character is a `-` (U+002D), […]
-                        (
-                            index == 1 &&
-                            codeUnit >= 0x0030 && codeUnit <= 0x0039 &&
-                            firstCodeUnit == 0x002D
-                            )
-                        ) {
-                        // http://dev.w3.org/csswg/cssom/#escape-a-character-as-code-point
-                        result += '\\' + codeUnit.toString(16) + ' ';
-                        continue;
-                    }
-
-                    // If the character is not handled by one of the above rules and is
-                    // greater than or equal to U+0080, is `-` (U+002D) or `_` (U+005F), or
-                    // is in one of the ranges [0-9] (U+0030 to U+0039), [A-Z] (U+0041 to
-                    // U+005A), or [a-z] (U+0061 to U+007A), […]
-                    if (
-                        codeUnit >= 0x0080 ||
-                        codeUnit == 0x002D ||
-                        codeUnit == 0x005F ||
-                        codeUnit >= 0x0030 && codeUnit <= 0x0039 ||
-                        codeUnit >= 0x0041 && codeUnit <= 0x005A ||
-                        codeUnit >= 0x0061 && codeUnit <= 0x007A
-                        ) {
-                        // the character itself
-                        result += string.charAt(index);
-                        continue;
-                    }
-
-                    // Otherwise, the escaped character.
-                    // http://dev.w3.org/csswg/cssom/#escape-a-character
-                    result += '\\' + string.charAt(index);
-
-                }
-                return result;
-            };
-        }
-
-    } (typeof global != 'undefined' ? global : this));
-
+        return result;
+    }
 }
 
 try {
@@ -225,5 +215,3 @@ try {
 } catch (ex) {
     CSSAnalyzer = module.exports;
 }
-
-
