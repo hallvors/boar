@@ -36,6 +36,7 @@ Tab.prototype.init = function (ip, port, hubPort) {
     width: 1024,
     height: 768
   };
+  self._onLoadFinishedCalled = false;
   self._page.settings.resourceTimeout = 60000;
   self._page.onResourceRequested = function (requestData, networkRequest) {
     self._onResourceRequested(requestData, networkRequest);
@@ -56,12 +57,20 @@ Tab.prototype.init = function (ip, port, hubPort) {
     self._onError(msg, stack);
   };
   self._page.onInitialized = function () {
+    self._onLoadFinishedCalled = false;
     self._onInitialized();
   };
   self._page.onLoadStarted = function () {
     self._onLoadStarted();
   };
   self._page.onLoadFinished = function (status) {
+    //because of css-analysis plugin, it adds new iframe that triggers
+    //onLoadFinished event resulting in endless loop
+    if(self._onLoadFinishedCalled) {
+      return;
+    }
+
+    self._onLoadFinishedCalled = true;
     self._onLoadFinished(status);
   };
   console.log("------");
@@ -405,6 +414,13 @@ Tab.prototype._getRedirects = function (callback) {
 };
 
 
+Tab.prototype._disablePlugins = function (disabled, callback) {
+  var self = this;
+  self._pluginManager.disable(disabled);
+  callback();
+};
+
+
 Tab.prototype._resetAutoDestruct = function () {
   var self = this;
   //console.log("Resetting auto Destruct");
@@ -498,6 +514,10 @@ Tab.prototype._handleRequest = function (request, response) {
     case "/getRedirects":
       self._resetAutoDestruct();
       self._getRedirects(callback);
+      break;
+    case "/disablePlugins":
+      self._resetAutoDestruct();
+      self._disablePlugins(data.plugins, callback);
       break;
     default:
       console.log("WHAT DO YOU WANT?");
