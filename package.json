@@ -15,13 +15,14 @@
   "homepage": "https://github.com/Asynchq/boar#readme",
   "scripts": {
     "test": "tests/run.sh",
-    "test_webkit" : "ENGINE=webkit node_modules/.bin/mocha --harmony --timeout 60000 --recursive tests || true",
-    "test_gecko" : "ENGINE=gecko node_modules/.bin/mocha --harmony --timeout 60000 --recursive tests || true"
+    "test_webkit": "ENGINE=webkit node_modules/.bin/mocha --harmony --timeout 60000 --recursive tests || true",
+    "test_gecko": "ENGINE=gecko node_modules/.bin/mocha --harmony --timeout 60000 --recursive tests || true"
   },
   "dependencies": {
     "async": "^1.5.0",
     "phantomjs": "^1.9.18",
     "ps-tree": "^1.0.1",
+    "rimraf": "^2.5.1",
     "slimerjs": "^0.9.6",
     "sugar": "^1.4.1",
     "usage": "^0.7.1",
