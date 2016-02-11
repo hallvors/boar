@@ -22,7 +22,7 @@ describe(process.env.ENGINE + ' CSS analysis', () => {
   describe('getPluginResult', () => {
     it('it should return some results for css analysis', (done) => {
       client.open({
-        url : 'https://google.com'
+        url : 'data:text/html,<p style="-webkit-transform:skew(-10deg); display:-webkit-flex">test page</p>'
       }).then(() => {
         return client.getPluginResults();
       })

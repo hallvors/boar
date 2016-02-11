@@ -45,41 +45,37 @@ function analyze() {
         return;
     }
     var list = [];
-    var neutralFrame = document.body.appendChild(document.createElement('iframe'));
-    var comparisonStyle = cloneobj(neutralFrame.contentWindow.getComputedStyle(neutralFrame.contentDocument.body));
-    document.body.removeChild(neutralFrame);
 
     var elms = document.querySelectorAll('div,nav,li');
     var css_properties = ['webkitAnimation', 'webkitTransition', 'webkitTransform'];
+    var css_content_check_properties = ['backgroundImage', 'display'];
     var css_values = ['-webkit-gradient', '-webkit-flex', '-webkit-box'];
+    var comparisonStyle = {'webkitAnimation':'', 'webkitTransition':'', 'webkitTransform':''};
     var ignore_values = ['', 'none']; // maybe 'auto' too?
 
     for (var i = 0, elm; elm = elms[i]; i++) {
-        var coords = elm.getBoundingClientRect();
-        var tmp = createCSSSelector(elm);
-        var obj = { selector: tmp[0].join(' '), index: tmp[1], coords: cloneobj(coords), problems: [] };
         var style = getComputedStyle(elm);
-
+        var problems = [];
         // property test
-        for (var j = 0, css; css = css_properties[j]; j++) {
+        css_properties.forEach(function(css) {
             // This is where we should figure out if the value is set or default..
-            if (style[css] !== comparisonStyle[css] && ignore_values.indexOf(style[css]) === -1) {
-                obj.problems.push({ property: css, value: style[css] });
+            if (style[css] !== '' && style[css] !== 'none') {
+                problems.push({ property: css, value: style[css] });
             }
-        }
-
-        // value test
-        for (var prop in style) {
-            if (isNaN(parseInt(prop)) && prop !== 'cssText') {// We skip the numerical lists of properties
-                for (j = 0, css; css = css_values[j]; j++) {
-                    if (style[prop] && style[prop].toString().indexOf(css) > -1) {
-                        obj.problems.push({ property: prop, value: style[prop] });
-                    }
+        });
+        // Now we check the value itself for -webkit- stuff
+         css_content_check_properties.forEach(function(prop){
+            css_values.forEach(function(css){
+                if (style[prop] && style[prop].toString().indexOf(css) > -1) {
+                    problems.push({ property: prop, value: style[prop] });
                 }
-            }
-        }
+            });
+        });
 
-        if (obj.problems.length) {
+        if (problems.length) {
+            var selector = createCSSSelector(elm);
+            var obj = { selector: selector[0].join(' '), index: selector[1], problems: problems };
+            obj.coords = cloneobj(elm.getBoundingClientRect());
             list.push(obj);
         }
     }
