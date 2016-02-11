@@ -39,18 +39,20 @@ function analyze() {
     Perhaps unsurprising, a major issue with this approach is performance.
     It might not seem like a big problem for something that can run by itself
     and record data at leisure, but slow performance makes it time consuming to
-    test and develop..
-
+    test and develop.. ALSO we have a 5 second deadline due to ping timeouts
     */
-
+    if(!('webkitAnimation' in document.documentElement.style)){
+        return;
+    }
     var list = [];
     var neutralFrame = document.body.appendChild(document.createElement('iframe'));
     var comparisonStyle = cloneobj(neutralFrame.contentWindow.getComputedStyle(neutralFrame.contentDocument.body));
     document.body.removeChild(neutralFrame);
 
-    var elms = document.querySelectorAll('*');
+    var elms = document.querySelectorAll('div,nav,li');
     var css_properties = ['webkitAnimation', 'webkitTransition', 'webkitTransform'];
     var css_values = ['-webkit-gradient', '-webkit-flex', '-webkit-box'];
+    var ignore_values = ['', 'none']; // maybe 'auto' too?
 
     for (var i = 0, elm; elm = elms[i]; i++) {
         var coords = elm.getBoundingClientRect();
@@ -61,7 +63,7 @@ function analyze() {
         // property test
         for (var j = 0, css; css = css_properties[j]; j++) {
             // This is where we should figure out if the value is set or default..
-            if (style[css] !== comparisonStyle[css]) {
+            if (style[css] !== comparisonStyle[css] && ignore_values.indexOf(style[css]) === -1) {
                 obj.problems.push({ property: css, value: style[css] });
             }
         }
