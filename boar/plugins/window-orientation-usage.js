@@ -36,6 +36,7 @@ WindowOrientationUsage.prototype.onConsoleMessage = function (msg, lineNum, sour
   var self = this;
   if(msg === messageString) {
     self.res = true;
+    return true;
   }
 }
 

@@ -186,12 +186,15 @@ Tab.prototype._onResourceTimeout = function (resourceError) {
 
 Tab.prototype._onConsoleMessage = function (msg, lineNum, sourceId) {
   var self = this;
-  self._pluginManager.onConsoleMessage(msg, lineNum, sourceId);
-  self._consoleLog.push({
-    msg: msg,
-    lineNum: lineNum,
-    sourceId: sourceId
-  });
+  // If the plugin manager's console message handler returns true,
+  // a plugin has handled the message and no further logging is required
+  if(self._pluginManager.onConsoleMessage(msg, lineNum, sourceId) !== true) {
+    self._consoleLog.push({
+      msg: msg,
+      lineNum: lineNum,
+      sourceId: sourceId
+    });
+  }
   console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
 };
 
