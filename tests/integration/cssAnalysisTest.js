@@ -37,5 +37,22 @@ describe(process.env.ENGINE + ' CSS analysis', () => {
       })
       .catch(done);
     });
+    it('it should return nothing if there are no relevant styles', (done) => {
+      client.open({
+        url : 'data:text/html,<div>test page</div>'
+      }).then(() => {
+        return client.getPluginResults();
+      })
+      .then((data) => {console.log(JSON.stringify(data.results['css-analyzer'], null, 4));
+        //right now css-analyzer tests for webkit specific things only
+        if(process.env.ENGINE==='webkit') {
+          data.results['css-analyzer'].length.should.eql(0);
+        } else {
+          should.exist(data.results['css-analyzer']);
+        }
+        done();
+      })
+      .catch(done);
+    });
   });
 });

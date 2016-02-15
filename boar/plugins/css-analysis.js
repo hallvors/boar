@@ -50,8 +50,6 @@ function analyze() {
     var css_properties = ['webkitAnimation', 'webkitTransition', 'webkitTransform'];
     var css_content_check_properties = ['backgroundImage', 'display'];
     var css_values = ['-webkit-gradient', '-webkit-flex', '-webkit-box'];
-    var comparisonStyle = {'webkitAnimation':'', 'webkitTransition':'', 'webkitTransform':''};
-    var ignore_values = ['', 'none']; // maybe 'auto' too?
 
     for (var i = 0, elm; elm = elms[i]; i++) {
         var style = getComputedStyle(elm);
