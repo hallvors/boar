@@ -41,10 +41,10 @@ function analyze() {
     and record data at leisure, but slow performance makes it time consuming to
     test and develop.. ALSO we have a 5 second deadline due to ping timeouts
     */
-    if(!('webkitAnimation' in document.documentElement.style)){
-        return;
-    }
     var list = [];
+    if(!('webkitAnimation' in document.documentElement.style)){ // if this engine doesn't have webkit* stuff, bail out
+        return list;
+    }
 
     var elms = document.querySelectorAll('div,nav,li');
     var css_properties = ['webkitAnimation', 'webkitTransition', 'webkitTransform'];
