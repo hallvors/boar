@@ -21,6 +21,10 @@ SlimerJS can use an environment variable to determine the exact Firefox binary t
 
 Run ```bin/boar gecko|webkit```, default port is 8778
 
+### Enhancing Boar with plugins
+
+To learn about writing Boar plugins, see [docs/PLUGINS.md](docs/PLUGINS.md).
+
 ### Troubleshooting SlimerJS issues
 
 * If you get an error saying "Platform version x.xx is not compatible with .." you must either set SLIMERJS_LAUNCHER to point to a Firefox binary of the expected version, or edit the MaxVersion setting in submodules/slimerjs/src/application.ini
