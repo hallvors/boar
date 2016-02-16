@@ -129,16 +129,22 @@ _PluginManager.prototype.onLoadFinished = function () {
 
 _PluginManager.prototype.onConsoleMessage = function (msg, lineNum, sourceId) {
     var self = this;
+    var returnValue = false;
     for (var p in self.plugins) {
         if (!self.pluginsStatus[p]) continue;
         if (self.plugins[p].onConsoleMessage) {
             try {
-                self.plugins[p].onConsoleMessage(msg, lineNum, sourceId);
+                // If the plugin returns true it has handled the message
+                if(self.plugins[p].onConsoleMessage(msg, lineNum, sourceId)) {
+                    returnValue = true;
+                    break;
+                }
             } catch (ex) {
                 console.log(ex);
             }
         }
     }
+    return returnValue;
 };
 
 
