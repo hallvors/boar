@@ -42,6 +42,6 @@ try {
     exports.Plugin = LinkRelCheck;
   }
 } catch (ex) {
-  IconLink = module.exports;
+  LinkRelCheck = module.exports;
 }
 
