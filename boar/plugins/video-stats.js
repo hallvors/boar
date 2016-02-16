@@ -8,7 +8,7 @@ We should gather info on <VIDEO> element usage, including:
  * readyState (ditto)
  * video embedding script name if recognisable
    * It would be nice to detect video.js, jplayer, popcorn.js,
-   * YouTube API scripts (old player, new iframe), brightcove
+   * YouTube API scripts (old player, new iframe), brightcove (old, new)
 */
 
 var fs = require('fs'),
@@ -40,8 +40,8 @@ VideoStats.prototype._libraryHeuristics = function(){
     'Popcorn': function(){return typeof window.Popcorn !== 'undefined';},
     'Kaltura': function(){return typeof window.kalturaIframeEmbed !== 'undefined';},
     'YouTube': function(){return typeof window.onYouTubePlayerReady !== 'undefined';},
-    'YouTubeOld': function(){return typeof window.ytplayer !== 'undefined';},
-    'YouTubeNew': function(){return window.YT && typeof window.YT.Player !== 'undefined';}
+    'YouTubeOld': function(){return typeof window.onYouTubePlayerReady !== 'undefined' && typeof window.ytplayer !== 'undefined';},
+    'YouTubeNew': function(){return typeof window.onYouTubePlayerReady !== 'undefined' && window.YT && typeof window.YT.Player !== 'undefined';}
   };
   for(var test in tests) {
     if(this._page.evaluate(tests[test])) {
@@ -52,11 +52,28 @@ VideoStats.prototype._libraryHeuristics = function(){
 };
 
 VideoStats.prototype.onResourceReceived = function (responseData) {
-  var type = responseData.contentType.toLowerCase();
-  // Detect loading requests of type video/*
-  // and Apple's vnd.mpeg-url stuff.
-  if(type.indexOf('video/') > -1 || type.indexOf('mpeg') > -1) {
-    this.res.httpTypes.push(responseData.contentType);
+  if(responseData.contentType) {
+    var type = responseData.contentType.toLowerCase();
+    // Detect loading requests of type video/*
+    // and Apple's vnd.mpeg-url stuff.
+    if(type.indexOf('video/') > -1 || type.indexOf('mpeg') > -1) {
+      if(this.res.httpTypes.indexOf(type) === -1){
+        this.res.httpTypes.push(type);
+      }
+    }
+  }
+
+  // Some domain and script names associated with new and old Brighcove players
+  if(responseData.url && responseData.url.indexOf('players.brightcove.net') > -1) {
+    this.res.libraries.push('brightcove-new');
+  }
+
+  if(responseData.url && /(admin|c)\.brightcove\.com/.test(responseData.url)) {
+    this.res.libraries.push('brightcove-old');
+  }
+
+  if(responseData.url && /BrightcoveExperiences/i.test(responseData.url)) {
+    this.res.libraries.push('brightcove-old');
   }
 };
 
