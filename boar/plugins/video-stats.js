@@ -37,6 +37,7 @@ VideoStats.prototype._libraryHeuristics = function(){
       return (window.jQuery && typeof window.jQuery.jPlayer !== 'undefined') ||
           window.$ && typeof $(document).jPlayer !== 'undefined';
     },
+    'flowplayer': function(){return typeof window.flowplayer !== 'undefined';},
     'Popcorn': function(){return typeof window.Popcorn !== 'undefined';},
     'Kaltura': function(){return typeof window.kalturaIframeEmbed !== 'undefined';},
     'YouTube': function(){return typeof window.onYouTubePlayerReady !== 'undefined';},
@@ -74,6 +75,10 @@ VideoStats.prototype.onResourceReceived = function (responseData) {
 
   if(responseData.url && /BrightcoveExperiences/i.test(responseData.url)) {
     this.res.libraries.push('brightcove-old');
+  }
+
+  if(responseData.url && /flowplayer/i.test(responseData.url)) {
+    this.res.libraries.push('flowplayer');
   }
 };
 
