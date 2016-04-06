@@ -99,7 +99,9 @@ Tab.prototype._onError = function (msg, stack) {
       msg += '         -> ' + (t.file || t.sourceURL) + ': ' + t.line + (t.function ? ' (in function ' + t.function + ')' : '') + "\n";
     });
   }
-  self._errorLog.push(msg);
+  if(self._errorLog.indexOf(msg) === -1) {
+    self._errorLog.push(msg);
+  }
   console.error(msg + "\n");
 };
 
